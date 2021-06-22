@@ -1,14 +1,24 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
+ import { SemanticIdentity } from "./SemanticIdentity";
+
 
 class VertexNode {
+
     constructor(vertex) {
         this.vertex = vertex;
+        if (this.rootNode == null){
+            //this.vertex.colour = "#CD5C5C";
+        }
+        //this.rootVertices.colour = "#CD5C5C";
+
         this.children = new Set();
     }
 
     add(node) {
+        //this.vertex.colour = "#CD5C5C";
+        node.vertex.colour = "#CD5C5C";
         this.children.add(node);
     }
 
@@ -224,6 +234,9 @@ class ArrowEdge {
 export class Graph {
     constructor(vertexArrayFlattened, arrowArrayFlattened) {
         this.rootVertices = new Set();
+
+        //this.rootVertices.colour = "#CD5C5C";
+
         if (vertexArrayFlattened !== undefined) {
             this.add(vertexArrayFlattened);
         }
@@ -397,6 +410,7 @@ export class Graph {
     has(object) {
         //Search for object in root vertices
         if (this.rootVertices.has(object)) {
+            
             return true;
 
         } else {
@@ -493,7 +507,7 @@ export class Graph {
                 }
             }
         }
-
+        
         return Array.from(verticesSet);
     }
 }

@@ -2,12 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-import { drawMarker, distanceThreshold } from "../UIElements/CanvasDraw";
+import { drawMarker, distanceThreshold, currentObjects } from "../UIElements/CanvasDraw";
 import { SemanticIdentity } from "./SemanticIdentity";
 
 export var padding = 5;
-export var defaultColour = "#FFD5A9";
+export var defaultColour = "#FFD5A9"; 
 export var defaultMinimumSize = 30;
+
+var manualID = "null";
 
 export class Vertex {
 
@@ -30,6 +32,8 @@ export class Vertex {
         this.imageElements = {};
         this.fontSize = 12;
 
+        //The following is a variable I'm adding to help me with root identification
+
         // Note these values often change in runtime
         this.width = width;
         this.height = height;
@@ -41,6 +45,17 @@ export class Vertex {
         this.height = Math.max(height, defaultMinimumSize);
 
         this.isAbstract = false;
+    }
+
+    //I'm putting this manual ID stuff here because the previous team's UUID stuff for verticess seems to be
+    //a little bit flawed. It seems that, on creation, the UUID of a vertex is based off of its name, description etc
+    //and not a random ID. These two functions down here help me keep track of vertices until this UUID stuff is fixed.
+    setManualID(yourID){
+        manualID = yourID;
+    }
+
+    getManualID(){
+        return manualID;
     }
 
     setSelected(selected) {

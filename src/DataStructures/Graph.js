@@ -3,23 +3,26 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
  import { SemanticIdentity } from "./SemanticIdentity";
 
+let rootColoured = 0;
+let rootVertexUUID = "nill";
 
 class VertexNode {
 
     constructor(vertex) {
         this.vertex = vertex;
-        if (this.rootNode == null){
-            //this.vertex.colour = "#CD5C5C";
-        }
-        //this.rootVertices.colour = "#CD5C5C";
-
         this.children = new Set();
     }
 
     add(node) {
-        //this.vertex.colour = "#CD5C5C";
-        node.vertex.colour = "#CD5C5C";
+        if (rootColoured === 0){
+            node.vertex.colour = "#CD5C5C";
+
+            node.vertex.setManualID("root");
+            rootColoured = 1;
+        }
+
         this.children.add(node);
+
     }
 
     remove(traversedVertices, node) {
@@ -28,15 +31,24 @@ class VertexNode {
 
         //Remove from the current vertex
         isRemoved = this.children.has(node);
+
         this.children.delete(node);
+        
+        if(this.getManualID() === "root"){
+            rootColoured = 0;
+            alert(rootColoured);
+        }
+        
 
         //Continue to remove from anywhere deeper in the tree
+        
         for (let child of this.children) {
             if (!traversedVertices.has(child)) {
                 traversedVertices.add(child);
                 isRemoved |= child.remove(traversedVertices, node);
             }
         }
+        
 
         return isRemoved;
     }

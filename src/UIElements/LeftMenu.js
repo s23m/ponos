@@ -209,6 +209,11 @@ export class LeftMenu extends React.Component{
         canvasDraw.drawAll()
     }
 
+    toggleContContext(){
+        this.state.selectedObject.toggleContContext()
+        canvasDraw.drawAll()
+    }
+
     getS23MIconsSelector() {
         let dropdownOptions = [<div className="DropdownItem"><div className="dropdownLabel">Name</div><div className="checkBoxContainer">Text</div><div className="checkBoxContainer">Icon</div></div>];
 
@@ -341,6 +346,10 @@ export class LeftMenu extends React.Component{
 
                 <label className="LeftLabel">Is Abstract?</label>
                 <input type="checkbox" id="IsAbstract" className="LeftCheckbox" defaultChecked={this.state.selectedObject.getAbstract()} onClick={() => this.toggleAbstract()}/>
+                <label className="LeftSpacer">&nbsp;</label>
+
+                <label className = "LeftLabel">Seperate Containment Context</label>
+                <input type="checkbox" id="seperateContainmentContext" className="LeftCheckbox" defaultChecked={this.state.selectedObject.getContContext()} onClick={() => this.toggleContContext()}/>
                 <label className="LeftSpacer">&nbsp;</label>
 
                 <button className="LeftMenuButton" onClick={() => this.deselectElement()}>Deselect</button>

@@ -41,6 +41,8 @@ export class Vertex {
         this.height = Math.max(height, defaultMinimumSize);
 
         this.isAbstract = false;
+
+        this.seperateContainmentContext = false;
     }
 
     setSelected(selected) {
@@ -69,8 +71,16 @@ export class Vertex {
         return this.isAbstract
     }
 
+    getContContext(){
+        return this.seperateContainmentContext;
+    }
+
     toggleAbstract(){
         this.isAbstract = !this.isAbstract
+    }
+
+    toggleContContext(){
+        this.seperateContainmentContext = !this.seperateContainmentContext;
     }
 
     getContentAsString() {
@@ -397,10 +407,19 @@ export class Vertex {
         // Draw name
         this.increaseWidthIfNecessary(canvasContext, canvasContext.measureText(this.title).width);
 
+        //For drawing vertex if abstract
         if(this.isAbstract) {
             canvasContext.font = "italic " + this.fontSize + "px Segoe UI";
         }else{
             canvasContext.font = this.fontSize + "px Segoe UI";
+        }
+
+        //For drawing vertex if sep cont context
+        if (this.seperateContainmentContext){
+            this.colour = "F9F4F3"
+        }
+        else{
+            this.colour = defaultColour
         }
 
         canvasContext.fillText(this.title, this.x+padding, this.y+dy+this.iconAreaHeight);

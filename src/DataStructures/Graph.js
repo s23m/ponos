@@ -67,10 +67,10 @@ class VertexNode {
         for (let childNode of this.children) {
             if (!traversedVertices.has(childNode)) {
                 traversedVertices.add(childNode);
-                flattenedArray.push(childNode.vertex);
+                flattenedArray.push(childNode.vertex); //switched to unshift (from push)
 
                 if (childNode !== null) {
-                    flattenedArray.push(...childNode.flatten(traversedVertices));
+                    flattenedArray.push(...childNode.flatten(traversedVertices)); //switched to unshift (from push)
                 }
             }
         }
@@ -84,10 +84,10 @@ class VertexNode {
         for (let childNode of this.children) {
             if (!traversedVertices.has(childNode)) {
                 traversedVertices.add(childNode);
-                flattenedArray.push(childNode);
+                flattenedArray.push(childNode); //switched to unshift (from push)
 
                 if (childNode !== null) {
-                    flattenedArray.push(...childNode.flattenVertexNodes(traversedVertices));
+                    flattenedArray.push(...childNode.flattenVertexNodes(traversedVertices)); //switched to unshift (from push)
                 }
             }
         }
@@ -122,7 +122,7 @@ class VertexNode {
         if (!traversed) {
             traversedVertices.add(this);
             for (let child of this.children) {
-                children.push(child.toTreeViewElement(traversedVertices));
+                children.push(child.toTreeViewElement(traversedVertices)); //switched to unshift (from push)
             }
         }
 
@@ -277,27 +277,28 @@ export class Graph {
             this.arrows.add(arrow);
 
             if (arrow.destVertexNode !== null && arrow.sourceVertexNode !== null) {
-                arrow.destVertexNode.add(arrow.sourceVertexNode);
+                //arrow.destVertexNode.add(arrow.sourceVertexNode);
+                arrow.sourceVertexNode.add(arrow.destVertexNode);
 
                 //If the destination of the arrow is currently a root vertex,
                 //search for if the destination has any other possible roots,
                 //and remove from the root ONLY IF another root is found
                 //This retains an entry point for the graph even if there is a cycle back to root
-                if (this.rootVertices.has(arrow.sourceVertexNode)) {
+                if (this.rootVertices.has(arrow.destVertexNode)) { //was (this.rootVertices.has(arrow.sourceVertexNode))
                     let isAnotherRoot = false;
 
                     for (let vertexNode of this.rootVertices) {
-                        if (vertexNode.vertex.semanticIdentity.UUID === arrow.sourceVertex.semanticIdentity.UUID) {
+                        if (vertexNode.vertex.semanticIdentity.UUID === arrow.destVertex.semanticIdentity.UUID) { //was if (vertexNode.vertex.semanticIdentity.UUID === arrow.sourceVertex.semanticIdentity.UUID)
                             continue;
                         }
 
-                        if (vertexNode.has(new Set(), arrow.sourceVertexNode)) {
+                        if (vertexNode.has(new Set(), arrow.destVertexNode)) { //was (vertexNode.has(new Set(), arrow.sourceVertexNode))
                             isAnotherRoot = true;
                         }
                     }
 
                     if (isAnotherRoot) {
-                        this.rootVertices.delete(arrow.sourceVertexNode);
+                        this.rootVertices.delete(arrow.destVertexNode); //was  this.rootVertices.delete(arrow.sourceVertexNode);
                     }
                 }
             }

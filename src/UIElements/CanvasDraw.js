@@ -110,6 +110,7 @@ export function drawAll() {
 }
 
 export function deleteElement(element) {
+
     if (element !== null) {
         if (!currentObjects.remove(element)) {
             console.error("Failed to delete object with UUID %s", element.semanticIdentity.UUID);
@@ -119,6 +120,33 @@ export function deleteElement(element) {
     }
 
     drawAll()
+}
+
+//this is the same as the above, except when you're deleting a vertex with an arrow connected the edge connection code freaks out.
+//this here deletes any arrows connected to the vertex before deleting the vertex to get around this
+export function vertexDeleteElement(element){ 
+    //find the UUID of the vertex for arrow dest and source matching
+    let selectedVertUUID = element.semanticIdentity.UUID;
+
+    //Get the arrow UUID's
+    let sourceUUIDs = currentObjects.ArrowUUIDSource(element);
+    let destUUIDs = currentObjects.ArrowUUIDDest(element);
+    //find an arrow with matching source/dest if they exist
+    
+    sourceUUIDs.forEach(element => currentObjects.remove(element.arrow));
+    destUUIDs.forEach(element => currentObjects.remove(element.arrow))
+
+    //Now that the arrows are out of the way, we're safe to delete the vertex (same code as above)
+    if (element !== null) {
+        if (!currentObjects.remove(element)) {
+            console.error("Failed to delete object with UUID %s", element.semanticIdentity.UUID);
+        }
+    } else {
+        console.error("Attempted to delete a null element");
+    }
+
+    drawAll()
+
 }
 
 export function updateRows() {
@@ -668,6 +696,28 @@ export function lineIntersector(canvas, x, y, secondObject) {
 	console.log("\n \n arrow path: " + arrowPath + "\n\n");
 	arrowPath = [];
 	
+	//previous object is below
+    if(previousObject.y > y && previousObject.x + previousObject.width > x) {
+		console.log("\n\n\n prev object was below \n\n\n");
+		startY = previousObject.y;
+		startX = previousObject.x + (0.5*previousObject.width);
+
+		endY = secondObject.y + secondObject.height+10;
+		endX = secondObject.x + (0.5*secondObject.width);
+
+	} 
+	// previous object is above
+	else if(previousObject.y < y && previousObject.x + previousObject.width > x && previousObject.x < x) 
+	{
+		console.log("\n\n\n prev object was above \n\n\n");
+		startY = previousObject.y + previousObject.height+10; //+ means go to bottom
+		startX = previousObject.x + (0.5*previousObject.width);
+
+		endY = secondObject.y;
+		endX = secondObject.x + (0.5*secondObject.width);
+	}
+	//previous object is left of //if you click higher it counts as above
+=======
 	//sizes based on Total Area
 	var blockpre = previousObject.height+ previousObject.width;
     var blocksec = secondObject.height + secondObject.width;
@@ -811,7 +861,7 @@ export function lineIntersector(canvas, x, y, secondObject) {
 				}
         }
 			
-    }
+  }
 
 
     //previous object is left 

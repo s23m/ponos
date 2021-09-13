@@ -2,10 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+import { currentObjects, getModelName } from "../UIElements/CanvasDraw";
+
+
 class VertexNode {
     constructor(vertex) {
         this.vertex = vertex;
         this.children = new Set();
+
+        //The path of this particular vertex node for displaying on the tree view element
+        this.cleanObjectPath = getModelName() + "/" + "Vertices";
+        this.vertexObjectPath = getModelName() + "/" + "Vertices";
     }
 
     add(node) {
@@ -116,14 +123,101 @@ class VertexNode {
         return false;
     }
 
-    toTreeViewElement(traversedVertices) {
+    toTreeViewElement(traversedVertices, returnOption) {
+
+        //Pretty much everything that's currently on the canvas is searched and then converted into the tree appropriate struct in the below if else statements.
+        //Then, the vertices and arrows folder nodes can display their appropriate children.
+        let ArrowChildren = [];
+        let VertexChildren = [];
+
         let children = [];
         let traversed = traversedVertices.has(this);
+
+        //Check which folder we're sticking these things into
+        if (returnOption === "vertexFolder"){
+            //All objects currently on the canvas (excluding things like folders which only exist as tree view elements)
+            for(let i = 0; i < currentObjects.flatten().length; i++){
+
+                //We onlt want the vertices in this folder
+                if (currentObjects.flatten()[i].typeName === "Vertex"){
+                    //Set the append the name of the path to include the vertex name
+                    if(currentObjects.flatten()[i].title === ""){
+                        this.setVertexTreePath("Unnamed Vertex");
+                    }
+
+                    else{
+                        this.setVertexTreePath(currentObjects.flatten()[i].title);
+                    }
+
+
+                    //Create the appropriate struct for a tree view element from the vertex data
+                    let tempTreeObj = {
+                        text: currentObjects.flatten()[i].title,
+                        children: [],
+                        data: currentObjects.flatten()[i],
+                        state: {opened: false}
+                    };
+
+                    //So you don't have vertices that are completely blank in the tree, looks kinda weird
+                    if (tempTreeObj.text === ""){
+                        tempTreeObj.text = "Unnamed Vertex";
+                    }
+                    
+                    //Finally, push to children. Makes it look like the following:
+                    //
+                    //  Vertex --+
+                    //           |
+                    //           +-- Unnamed Vertex   
+                    
+                    VertexChildren.push(tempTreeObj);
+                }
+
+            }
+            
+            //vertices folder
+            return{
+                text: "Vertices",
+                children: VertexChildren,
+                data: null,
+                state: { opened: true }
+            }
+        }
+
+        //same as above if statement but for arrows
+        else if (returnOption === "arrowFolder"){
+            for(let i = 0; i < currentObjects.flatten().length; i++){
+
+                if (currentObjects.flatten()[i].typeName !== "Vertex"){
+                    let tempTreeObj = {
+                        text: currentObjects.flatten()[i].semanticIdentity.UUID,
+                        children: [],
+                        data: currentObjects.flatten()[i],
+                        state: {opened: false}
+                    };
+    
+                    ArrowChildren.push(tempTreeObj);
+                }
+
+            }
+
+
+            return{
+                text: "Arrows",
+                children: ArrowChildren,
+                data: null,
+                state: { opened: true }
+            }
+        }
+
+        //This down here is for vertex heirarchy stuff, not really needed anymore.
+        /*
         if (!traversed) {
             traversedVertices.add(this);
+            
             for (let child of this.children) {
-                children.push(child.toTreeViewElement(traversedVertices));
+                //children.push(child.toTreeViewElement(traversedVertices));
             }
+            
         }
 
         let text = this.vertex.title;
@@ -138,7 +232,30 @@ class VertexNode {
             data: this.vertex,
             state: { opened: true }
         };
+        */
     }
+
+    setTreeViewElement(folderTitle){ //For when you want to make a folder type of element
+        let fakeChildren = [];
+        return{
+            text: folderTitle,
+            children: fakeChildren,
+            state: {opened: true}
+        };
+    }
+
+    //this function sets the path of a particular vertex node so that you can 
+    //1. Display that item's path in the actual vertex (if you want)
+    //2. Show a tree view that only contains the path to a desired vertex 
+    setVertexTreePath(treePath){
+        this.vertexObjectPath = this.cleanObjectPath + "/" + treePath;
+    }
+
+    //Return the vertice's object path
+    returnVertexTreePath(){
+        return this.vertexObjectPath;
+    }
+
 }
 
 class ArrowEdge {
@@ -307,6 +424,42 @@ export class Graph {
         }
     }
 
+    //A way of returning the arrow UUID's associated with the deleted vertex. For some reason the source and ending
+    //UUID data isn't being saved properly upstream, so this is a way around that.
+    ArrowUUIDSource(object){
+        object = this.getVertexNode(object);
+        //first index is source, second is destination
+        let returnArray = [];
+
+        //Match an arrow
+        let i = 0;
+        for (let arrow of this.arrows) {
+            if (arrow.sourceVertexNode !== null && arrow.sourceVertex.semanticIdentity.UUID === object.vertex.semanticIdentity.UUID) {
+                returnArray[i] = arrow;
+                i += 1;
+            }
+        }
+
+        return returnArray;
+    }
+
+    ArrowUUIDDest(object){
+        object = this.getVertexNode(object);
+        //first index is source, second is destination
+        let returnArray = [];
+
+        //Match an arrow
+        let i = 0;
+        for (let arrow of this.arrows) {
+            if (arrow.destVertexNode !== null && arrow.destVertex.semanticIdentity.UUID === object.vertex.semanticIdentity.UUID) {
+                returnArray[i] = arrow;
+                i += 1;
+            }
+        }
+
+        return returnArray;
+    }
+
     //Removes and object while shifting it's children's position in the tree
     remove(object) {
         if (object.constructor.name === "Vertex") {
@@ -318,6 +471,7 @@ export class Graph {
             for (let child of object.children) {
                 this.rootVertices.add(child);
             }
+            console.log("It removes from the root fine")
             
             //Remove from anywhere deeper in the tree
             let traversedVertices = new Set();
@@ -327,6 +481,7 @@ export class Graph {
                     isRemoved |= vertexNode.remove(traversedVertices, object);
                 }
             }
+            
             
             if (isRemoved) {
                 //Remove the vertex from being the source or dest of any arrow
@@ -340,6 +495,7 @@ export class Graph {
                     }
                 }
             }
+            
 
             return isRemoved;
 

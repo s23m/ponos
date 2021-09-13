@@ -20,15 +20,27 @@ import iconContainer from "../Resources/container.svg"
 
 
 import {deleteElement} from "./CanvasDraw";
+import { vertexDeleteElement } from './CanvasDraw';
 import DropdownButton from "react-bootstrap/DropdownButton";
+import {displayFocussedTreeView} from "./ContainmentTree.js"
+
+// Show the vertex path
+import {showVertexPath} from "./ContainmentTree.js";
+
+// The variable that contains the found path of a given vertex
+import { someVertexPath } from './ContainmentTree';
 
 //Property Enums
 export const LeftMenuType = {
     TreeView: "TreeView",
     Vertex: "Vertex",
     Arrow: "Arrow",
+
+    //FTreeView: "FocussedTreeView"
+
     Artifact: "Artifact",
     Container:"Container"
+
 };
 
 export const LeftMenuTypeToString = {};
@@ -79,6 +91,27 @@ export class LeftMenu extends React.Component{
 
     }
 
+    /*
+    leftMenuContents = <form id = "VertexMenu">
+                <div className="LeftHeader">Vertex Properties</div>
+                <label className="LeftLabel">Title</label>
+                <input id="LeftTitle" className="LeftTitle" defaultValue={this.state.selectedObject.title} onKeyUp={() => this.setTitle()}/>
+                <label className="LeftSpacer">&nbsp;</label>
+    
+                */
+               
+    /// This is a test function, remove it if I forget to
+    testUpdateLabel = (type) =>{
+        this.setPath("fffffffff")
+        //document.getElementById("VertPath").value = "It doth been updated";
+        
+        //console.log("RIGHT HERE " + document.getElementById("VertPath").value)
+    }
+
+
+
+    /// 
+
     componentDidMount() {
         this.menu = this.props.mainState.menu;
         this.selectedItem = this.props.mainState.drawMode;
@@ -88,11 +121,13 @@ export class LeftMenu extends React.Component{
     }
 
     //For quickkeys
+
+
     onKeyPressed(e) {
         if (e.keyCode === 86 && this.state.selectedObject === null){
             this.props.setMode(Tool.Vertex);
-            //alert('yeet');
         }
+
 
         if (e.keyCode === 69 && this.state.selectedObject === null){
             this.props.setMode(Tool.Edge);
@@ -307,6 +342,14 @@ export class LeftMenu extends React.Component{
         canvasDraw.drawAll();
     }
 
+    showTreeView(){
+        //this.state.menu = LeftMenuType.TreeView;
+        //console.log("HENLO: " + this.state);
+        //leftMenuContents = <ContainmentTree setLeftMenu = {this.props.setLeftMenu} />;
+        this.state.selectedObject(null)
+        canvasDraw.drawAll();
+    }
+
     stripElement(e){
         e.preventDefault()
         this.state.selectedObject.trimPath();
@@ -322,9 +365,12 @@ export class LeftMenu extends React.Component{
 
         let toolbar = <div id = "Toolbar" className = "Toolbar">
             <div id = "Select" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Select)}><img src={iconSelect} alt ="Select"/></div>
-            <div id="Vertex" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Vertex)} onKeyDown={() => this.onKeyPressed()}    ><img src={iconVertex} alt="Vertex" /></div>
+
+            <div id = "Vertex" className="ToolbarItem" onClick={() => {this.props.setMode(Tool.Vertex); }} onKeyDown={() => this.onKeyPressed()}    ><img src={iconVertex} alt ="Vertex"/></div>
+
             <div id="Artifact" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Artifact)} onKeyDown={() => this.onKeyPressed()}    ><img src={iconArtifact} alt="Artifact" /></div>
             <div id="Container" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Container)} onKeyDown={() => this.onKeyPressed()}    ><img src={iconContainer} alt="Container" /></div>
+
             <div id = "Edge" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Edge)}><img src={iconEdge} alt ="Edge"/></div>
             <div id = "Specialisation" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Specialisation)}><img src={iconSpecialisation} alt ="Specialisation"/></div>
             <div id = "Visibility" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Visibility)}><img src={iconVisibility} alt ="Visibility"/></div>
@@ -358,7 +404,18 @@ export class LeftMenu extends React.Component{
 
                 <button className="LeftMenuButton" onClick={() => this.deselectElement()}>Deselect</button>
                 <label className="LeftSpacer">&nbsp;</label>
-                <button className="LeftMenuButton" onClick={() => {deleteElement(this.state.selectedObject);this.setState({menu:"TreeView"})}} placeholder="NoTabIndex">Remove</button>
+                <button className="LeftMenuButton" onClick={() => {/*deleteElement(this.state.selectedObject)*/vertexDeleteElement(this.state.selectedObject);this.setState({menu:"TreeView"})}} placeholder="NoTabIndex">Remove</button>
+
+                <label className="LeftSpacer">&nbsp;</label>
+                <button className="LeftMenuButton" onClick={() => {displayFocussedTreeView(this.state.selectedObject); this.setState({menu:"TreeView"})}}>Focus/Unfocus Treeview</button>
+
+                <label className="LeftSpacer">&nbsp;</label>
+                
+    
+                <input id="VertPath" className="LeftLabel" defaultValue={this.state.selectedObject.vertexPath}/>
+                
+
+
             </form>;
 
         } else if (this.state.menu === LeftMenuType.Artifact) {
@@ -480,6 +537,9 @@ export class LeftMenu extends React.Component{
                     <button className="LeftMenuButton" onClick={() => this.deselectElement()}>Deselect</button>
                     <label className="LeftSpacer">&nbsp;</label>
                     <button className="LeftMenuButton" onClick={() => {deleteElement(this.state.selectedObject);this.setState({menu:LeftMenuType.TreeView,selectedObject:null})}}>Remove</button>
+
+                    <div className="LeftSpacer">&nbsp;</div>
+                    <button className="LeftMenuButton" onClick={() => {displayFocussedTreeView(this.state.selectedObject);this.setState({menu:LeftMenuType.TreeView,selectedObject:null})}}>Focus/Unfocus Treeview</button>
 
                     </form>
             }

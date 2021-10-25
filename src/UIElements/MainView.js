@@ -115,7 +115,9 @@ export class MainProgramClass extends React.Component {
             this.setState({ drawMode: "Artifact" })
         } else if (mode === Tool.Container) {
             this.setState({ drawMode: "Container" })
-        }
+        } else if (mode === Tool.Contains) {
+            this.setState({ drawMode: "Contains" })
+        } 
 
         console.log(Tool[mode]);
 

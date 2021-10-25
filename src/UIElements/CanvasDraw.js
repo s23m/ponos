@@ -7,6 +7,7 @@ import { Arrow } from "../DataStructures/Arrow";
 import { Tool } from "./LeftMenu";
 import { Graph } from "../DataStructures/Graph";
 import { ArrowBackIos } from "@material-ui/icons";
+import { showVertexPath } from './ContainmentTree';
 
 // Core variables
 var canvasElement;
@@ -343,6 +344,23 @@ export function newFile() {
 
 function arrowToolSelected() {
     return arrowType === Tool.Visibility || arrowType === Tool.Edge || arrowType === Tool.Specialisation
+}
+
+export function containsArrow(Object) {
+    //user needs to select object
+    //it will draw the arrow for them
+    if (Object !== null) {
+        let currentObjectsFlattened = currentObjects.flatten();
+        let cx = Object.x;
+        let cy = Object.y;
+        let path = [(cx,cy-30),(cx-30,cy-30),(cx-30,cy+60),(cx+30,cy+30),(cx+30,cy)];
+        // Create arrow
+        var arrow = new Arrow(currentObjectsFlattened, path, Tool.Edge);
+        arrow.rebuildPath(currentObjectsFlattened);
+        console.log("returned this arrow");
+        return arrow;
+    }
+    
 }
 
 export function getObjectFromUUID(UUID) {
@@ -950,8 +968,8 @@ export function lineIntersector(canvas, x, y, secondObject) {
                 secondObject.y = previousObject.y;
 
                 startY = previousObject.y + (previousObject.height + 10) / 2;
-                startX = previousObject.x + previousObject.width;
-                endX = secondObject.x;
+                startX = secondObject.x;
+                endX = previousObject.x + previousObject.width;
                 endY = startY;
 
                 checkHorizArrowsConnectedToBox(secondObject);
@@ -1033,7 +1051,7 @@ export function lineIntersector(canvas, x, y, secondObject) {
 
             endX = secondObject.x + secondObject.width;
             endY = startY;
-
+            console.log("aaa");
         }
         //Second is smaller and on inside
         else if (secondObject.y > previousObject.y && secondObject.y + secondObject.height < previousObject.y + previousObject.height) {
@@ -1106,15 +1124,14 @@ export function lineIntersector(canvas, x, y, secondObject) {
                 previousObject.y = secondObject.y;
                 
 
-                startX = previousObject.x;
+                startX = secondObject.x + secondObject.width;
                 startY = secondObject.y + (secondObject.height + 10) / 2;
 
-                endX = secondObject.x + secondObject.width;
+                endX = previousObject.x;
                 endY = startY;
 
                 checkHorizArrowsConnectedToBox(previousObject);
 
-                console.log("v");
             }
         }
 
@@ -1316,7 +1333,11 @@ export function onLeftMouseRelease(canvas, x, y) {
 					    }
 				    }   
 			    }
-			}
+			} else {
+
+                console.log("\n the old one \n");
+			  newObject = createObject(canvas, mouseStartX, mouseStartY, x, y);
+            }
 
             // Reset path
             arrowPath = [];
@@ -1369,8 +1390,11 @@ export function onLeftMouseRelease(canvas, x, y) {
             };
             firstArrowJoint = false;
         }
+        
+
 
     }
+
 
     if (canvas.tool === Tool.Vertex) {
         let newObject = createObject(canvas, mouseStartX, mouseStartY, x, y);
@@ -1389,13 +1413,17 @@ export function onLeftMouseRelease(canvas, x, y) {
     if (canvas.tool === Tool.Container) {
         let newObject = createContainer(canvas, mouseStartX, mouseStartY);
         newObject.setColour("#FFFFFF");
+        newObject.setTitle(newObject.vertexPath);
         addObject(newObject);
         canvas.props.setLeftMenu(newObject);
         canvas.props.setMode(Tool.Select);
     }
-        
-    
-
+    if (canvas.tool === Tool.Contains) {
+        let ob = findIntersected(x,y);
+        let newArrow = containsArrow(ob);
+        addObject(newArrow);
+        canvas.props.setMode(Tool.Select);
+    }
     
     drawAll(currentObjects);
 

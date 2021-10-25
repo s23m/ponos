@@ -17,6 +17,7 @@ import iconVisibility from "../Resources/visibility.svg"
 import iconSelect from "../Resources/select.svg"
 import iconArtifact from "../Resources/artifact.svg"
 import iconContainer from "../Resources/container.svg"
+import iconContains from "../Resources/contains.svg"
 
 
 import {deleteElement} from "./CanvasDraw";
@@ -39,7 +40,8 @@ export const LeftMenuType = {
     //FTreeView: "FocussedTreeView"
 
     Artifact: "Artifact",
-    Container:"Container"
+    Container:"Container",
+    Contains:"Contains"
 
 };
 
@@ -47,8 +49,9 @@ export const LeftMenuTypeToString = {};
 LeftMenuTypeToString[LeftMenuType.TreeView] = "TreeView";
 LeftMenuTypeToString[LeftMenuType.Vertex] = "Vertex";
 LeftMenuTypeToString[LeftMenuType.Arrow] = "Arrow";
-LeftMenuTypeToString[LeftMenuType.Arrow] = "Artifact";
-LeftMenuTypeToString[LeftMenuType.Arrow] = "Container";
+LeftMenuTypeToString[LeftMenuType.Vertex] = "Artifact";
+LeftMenuTypeToString[LeftMenuType.Vertex] = "Container";
+LeftMenuTypeToString[LeftMenuType.Arrow] = "Contains";
 
 export const StringToLeftMenuType = {};
 LeftMenuTypeToString["TreeView"] = LeftMenuType.TreeView;
@@ -56,6 +59,7 @@ LeftMenuTypeToString["Vertex"] = LeftMenuType.Vertex;
 LeftMenuTypeToString["Arrow"] = LeftMenuType.Arrow;
 LeftMenuTypeToString["Artifact"] = LeftMenuType.Artifact;
 LeftMenuTypeToString["Container"] = LeftMenuType.Container;
+LeftMenuTypeToString["Contains"] = LeftMenuType.Contains;
 
 export const Tool = {
     Select: "Select",
@@ -65,6 +69,7 @@ export const Tool = {
     Specialisation: "Specialisation",
     Artifact: "Artifact",
     Container: "Container",
+    Contains: "Contains"
 };
 
 // class to display the left hand menu, where we will be showing
@@ -374,6 +379,8 @@ export class LeftMenu extends React.Component{
             <div id = "Edge" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Edge)}><img src={iconEdge} alt ="Edge"/></div>
             <div id = "Specialisation" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Specialisation)}><img src={iconSpecialisation} alt ="Specialisation"/></div>
             <div id = "Visibility" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Visibility)}><img src={iconVisibility} alt ="Visibility"/></div>
+            <div id="Contains" className="ToolbarItem" onClick={() => this.props.setMode(Tool.Contains)} onKeyDown={() => this.onKeyPressed()}    ><img src={iconContains} alt="Contains" /></div>
+
         </div>;
 
         if (this.state.menu === LeftMenuType.TreeView) {
@@ -531,7 +538,11 @@ export class LeftMenu extends React.Component{
                 <button className="LeftMenuButton" onClick={() => {deleteElement(this.state.selectedObject);this.setState({menu:LeftMenuType.TreeView,selectedObject:null})}}>Remove</button>
 
             </form>
-            }else{
+            } else if (this.state.menu === LeftMenuType.Contains) {
+                console.log("Contains Selected");
+                canvasDraw.drawAll();
+            }
+            else{
                 leftMenuContents = <form id = "ArrowMenu">
                     <div className="LeftHeader">Selected Edge</div>
                     <button className="LeftMenuButton" onClick={() => this.deselectElement()}>Deselect</button>

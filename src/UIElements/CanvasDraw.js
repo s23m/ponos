@@ -1168,7 +1168,7 @@ export function lineIntersector(canvas, x, y, secondObject) {
 
                 checkHorizArrowsConnectedToBox(secondObject);
 
-                console.log("u");
+                console.log();
             }
 
             if (blockpre >= blocksec) {
@@ -1392,7 +1392,7 @@ export function onLeftMouseRelease(canvas, x, y) {
                 }
             } else {
                 //console.log("\n the old one \n");
-                newObject = createObject(canvas, mouseStartX, mouseStartY, x, y);
+                //newObject = createObject(canvas, mouseStartX, mouseStartY, x, y);
             }
 
             // Reset path
